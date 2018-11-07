@@ -1,5 +1,4 @@
 // Created nov 07 wed 2018
-// Rukovodstvo po JAVA E.Popov 2017 p.85
 // javac -d bin GUI.java && java -cp bin mypack.GUI
 
 package mypack;
