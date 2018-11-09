@@ -1,11 +1,13 @@
-// Created nov 07 wed 2018
-// javac -d bin GUI.java && java -cp bin mypack.GUI
+// Created nov 09 fri 2018
+// http://www.ntu.edu.sg/home/ehchua/programming/java/J8c_PlayingSound.html
+// javac -d bin GUI.java Player.java && java -cp bin mypack.GUI
 
 package mypack;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
+import javax.sound.sampled.*;
 import javax.swing.*;
 
 public class GUI extends JFrame implements MouseListener, MouseWheelListener {
@@ -15,7 +17,12 @@ public class GUI extends JFrame implements MouseListener, MouseWheelListener {
 	private boolean mousePressed = false;
 	private Ellipse2D circlePlay = new Ellipse2D.Double ( x + 25, y + 25, 100, 100 );
 	public int vol = 250;
+	public float volume = 5.3f;
 	private Ellipse2D circleVolume = new Ellipse2D.Double ( x-7, y-7, 165, 165 );
+	public static boolean status = false;
+	private Player player = new Player ();
+	private boolean isPlaying = false;
+	private boolean isPause = false;
 
   public GUI () {
 	setTitle ( "One Play" );
@@ -26,6 +33,7 @@ public class GUI extends JFrame implements MouseListener, MouseWheelListener {
     setVisible ( true );
     addMouseListener ( this );
     addMouseWheelListener ( this );
+    player.openFile ( "audio.wav" );
   }
 
   // paint is called automatically when program begins, when window is
@@ -48,42 +56,82 @@ public class GUI extends JFrame implements MouseListener, MouseWheelListener {
   }
 
   // The next 4 methods must be defined, but you won't use them.
-  public void mouseReleased ( MouseEvent e ) { }
-  public void mouseEntered ( MouseEvent e ) { }
-  public void mouseExited ( MouseEvent e ) { }
-  public void mousePressed ( MouseEvent e ) { }
+	public void mouseReleased ( MouseEvent e ) { }
+	public void mouseEntered ( MouseEvent e ) { }
+	public void mouseExited ( MouseEvent e ) { }
+	public void mousePressed ( MouseEvent e ) { }
 
-  public void mouseClicked ( MouseEvent e ) {
+	public void mouseClicked ( MouseEvent e ) {
     if ( circlePlay.contains ( e.getPoint () ) ) {
-      System.out.println ( "Click Gray circle" );
-      mousePressed = !mousePressed;
-      repaint ();
-    } // */
-  }
-
-  void eventOutput ( String eventDescription ) {
-        System.out.println ( eventDescription );
-    }
-
-	public void mouseWheelMoved ( MouseWheelEvent e ) {
-        String message = "";
-        if ( circleVolume.contains ( e.getPoint () ) ) {
-			int notches = e.getWheelRotation ();
-        if ( notches < 0 && vol > 0 ) {
-			vol -= 5;
-            message = vol + " Mouse wheel moved UP\n";
-        } else if ( vol < 270 ) {
-			vol += 5;
-            message = vol + " Mouse wheel moved DOWN\n";
-        }
-        repaint ();
-        eventOutput( message );
+		if ( !isPlaying ) {
+			playFile ();
+			System.out.println ( "Click Play" );
+			isPlaying = true;
+			mousePressed = true;
 		}
+		else {
+			stopFile ();
+			System.out.println ( "Click Pause" );
+			isPlaying = false;
+			mousePressed = false;
+		}
+		repaint ();
     }
+    else {
+		if ( isPlaying ) {
+			mousePressed = false;
+			stopFile ();
+			closeFile ();
+			isPlaying = false;
+			System.out.println ( "Click Stop" );
+		}
+		else {
+			isPlaying = true;
+			openFile ( "audio.wav" );
+			System.out.println ( "Click Open" );
+		}
+		repaint ();
+	  }
+	}
 
-  public static void main ( String [] args ) {
-    new GUI ();
+  void eventOutputVolume ( String eventDescription ) {
+        System.out.println ( eventDescription );
   }
+	// VOLUME
+	public void mouseWheelMoved ( MouseWheelEvent e ) {
+		String message = "";
+		if ( circleVolume.contains ( e.getPoint () ) ) {
+			int notches = e.getWheelRotation ();
+			if ( notches < 0 && vol > 0 ) {
+				vol -= 5;
+				volume += 1.3f;
+				setVolume ();
+				System.out.println ( ( float ) Math.log ( volume ) );
+				message = vol + " volume +\n";
+			} else if ( vol < 270 ) {
+				vol += 5;
+				volume -= 1.3f;
+				setVolume ();
+				System.out.println ( ( float ) Math.log ( volume ) );
+				message = vol + " volume -\n";
+			}
+			repaint ();
+			eventOutputVolume ( message );
+		}
+	}
+	void openFile ( String file ) { player.openFile ( "audio.wav" ); }
+	void playFile () { player.getClip ().start (); }
+	void loopFile () { player.getClip ().loop ( Clip.LOOP_CONTINUOUSLY ); } // 0, 1, ... int
+	void stopFile () { player.getClip ().stop (); }
+	void closeFile () { player.getClip ().close (); }
+	void setVolume () { player.getFloatControl ().setValue ( ( float ) Math.log ( volume ) ); }
+	float getValueVolume () { return player.getFloatControl ().getValue (); }
+	float getMaxValueVolume () { return player.getFloatControl ().getMaximum (); }
+	float getMinValueVolume () { return player.getFloatControl ().getMinimum (); }
+
+	public static void main ( String [] args ) {
+		new GUI ();
+	}
 }
 
 /*
