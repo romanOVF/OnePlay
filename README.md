@@ -4,6 +4,6 @@ Audio player
 Added file GUI.java  
 2018 11 09  
 Added Player.java
-Added the ability to adjust the volume
+Added the ability to adjust the volume  
 2018 11 10  
 Minor improvements in volume control  
