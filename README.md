@@ -7,3 +7,4 @@ Added Player.java
 Added the ability to adjust the volume  
 2018 11 10  
 Minor improvements in volume control  
+Another minor improvement in volume control  

@@ -18,10 +18,10 @@ public class GUI extends JFrame implements MouseListener, MouseWheelListener {
 	private int y = 40;   // topmost  pixel in circle has this y-coordinate
 	private boolean mousePressed = false;
 	private Ellipse2D circlePlay = new Ellipse2D.Double ( x + 25, y + 25, 100, 100 );
-	public int vol = 250;
-	public float volume = 0.011f;
+	private int vol = 250;
+	private float volume = 0.011f;
 	private Ellipse2D circleVolume = new Ellipse2D.Double ( x-7, y-7, 165, 165 );
-	public static boolean status = false;
+	private static boolean status = false;
 	private Player player = new Player ();
 	private boolean isPlaying = false;
 	private boolean isPause = false;
@@ -42,9 +42,9 @@ public class GUI extends JFrame implements MouseListener, MouseWheelListener {
   // paint is called automatically when program begins, when window is
   // refreshed and  when repaint() is invoked
   public void paint ( Graphics g ) {
-	g.setColor ( Color.RED );
-	g.fillOval ( x-7, y-7, 165, 165 );
-	g.setColor ( Color.DARK_GRAY );
+		g.setColor ( Color.RED );
+		g.fillOval ( x-7, y-7, 165, 165 );
+		g.setColor ( Color.DARK_GRAY );
     g.fillArc ( x-7, y-7, 165, 165, -45, -90 );
     g.setColor ( Color.YELLOW );
     g.fillArc ( x-7, y-7, 165, 165, -45, vol );
@@ -108,7 +108,7 @@ public class GUI extends JFrame implements MouseListener, MouseWheelListener {
 			int notches = e.getWheelRotation ();
 			if ( notches < 0 && vol > 0 ) {
 				vol -= 5;
-				if ( volume > 1.99f ) volume = 1.99f;
+				if ( volume > 1.95f ) volume = 1.99f;
 				else volume += 0.0397f;
 				setVolume ();
 				System.out.println ( volume );
@@ -127,18 +127,20 @@ public class GUI extends JFrame implements MouseListener, MouseWheelListener {
 			eventOutputVolume ( message );
 		}
 	}
-	public void setPlayerVolume () { player.setVolume ( volume ); }
-	void openFile ( String file ) { player.openFile ( "audio.wav" ); }
-	void playFile () { player.getClip ().start (); }
-	void loopFile () { player.getClip ().loop ( Clip.LOOP_CONTINUOUSLY ); } // 0, 1, ... int
-	void stopFile () { player.getClip ().stop (); }
-	void closeFile () { player.getClip ().close (); }
-	void setVolume () {
+	private void setPlayerVolume () {
+		player.setVolume ( ( float ) ( Math.log ( volume ) / Math.log ( 10.0 ) * 20.0 ) );
+	}
+	private void openFile ( String file ) { player.openFile ( "audio.wav" ); }
+	private void playFile () { player.getClip ().start (); }
+	private void loopFile () { player.getClip ().loop ( Clip.LOOP_CONTINUOUSLY ); } // 0, 1, ... int
+	private void stopFile () { player.getClip ().stop (); }
+	private void closeFile () { player.getClip ().close (); }
+	private void setVolume () {
 			player.getFloatControl ().setValue ( ( float ) ( Math.log ( volume ) / Math.log ( 10.0 ) * 20.0 ) );
 	}
-	float getValueVolume () { return player.getFloatControl ().getValue (); }
-	float getMaxValueVolume () { return player.getFloatControl ().getMaximum (); }
-	float getMinValueVolume () { return player.getFloatControl ().getMinimum (); }
+	private float getValueVolume () { return player.getFloatControl ().getValue (); }
+	private float getMaxValueVolume () { return player.getFloatControl ().getMaximum (); }
+	private float getMinValueVolume () { return player.getFloatControl ().getMinimum (); }
 
 	public static void main ( String [] args ) {
 		new GUI ();
