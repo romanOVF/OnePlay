@@ -1,4 +1,4 @@
-// Created nov 09 fri 2018
+// Created nov 10 sat 2018
 
 package mypack;
 
@@ -37,4 +37,5 @@ public class Player extends JFrame {
 
 	public Clip getClip () { return clip; }
 	public FloatControl getFloatControl () { return gainControl; }
+	public void setVolume ( float volume ) { this.volume = volume; }
 }
