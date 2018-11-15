@@ -12,8 +12,9 @@ public class GUI extends JFrame implements MouseListener, MouseWheelListener {
 
 	private int x = 25;   // leftmost pixel in circle has this x-coordinate
 	private int y = 40;   // topmost  pixel in circle has this y-coordinate
-	private Ellipse2D circlePlay = new Ellipse2D.Double ( x + 25, y + 25, 100, 100 );
-	private Ellipse2D circleVolume = new Ellipse2D.Double ( x - 7, y - 7, 165, 165 );
+	private Ellipse2D circleOpen = new Ellipse2D.Double ( 29, 44, 142, 142 );
+	private Ellipse2D circlePlay = new Ellipse2D.Double ( 50, 65, 100, 100 );
+	private Ellipse2D circleVolume = new Ellipse2D.Double ( 18, 33, 165, 165 );
 	private PlayTool playTool = new PlayTool ();
 	private int vol = 135;
 	private float volume = 0.5f;
@@ -54,6 +55,7 @@ public class GUI extends JFrame implements MouseListener, MouseWheelListener {
     g.setColor ( Color.BLACK );
     Graphics2D g2 = ( Graphics2D ) g;
     g2.draw ( circlePlay );
+    g2.draw ( circleOpen );
   }
 
   // The next 4 methods must be defined, but you won't use them.
@@ -64,44 +66,49 @@ public class GUI extends JFrame implements MouseListener, MouseWheelListener {
 
 	// ROUND BUTTON
 	public void mouseClicked ( MouseEvent e ) {
-    if ( circlePlay.contains ( e.getPoint () ) ) {
-		if ( !isPlaying ) {
-			if ( !isResume ) {
-				isResume = true;
-				openFile ( audioFile );
-				playAudio ();
+    if ( !( !circlePlay.contains ( e.getPoint () ) && circleOpen.contains ( e.getPoint () ) ) ) {
+			if ( !isPlaying ) {
+				if ( !isResume ) {
+					isResume = true;
+					openFile ( audioFile );
+					playAudio ();
+					System.out.println ( "1.0 - " + playTool.getPlayer ().getStatus () );
+				}
+				else if ( isResume ) { // isResume
+					isResume = true;
+					playResume ();
+					System.out.println ( "1.1 - " + playTool.getPlayer ().getStatus () );
+				}
+				System.out.println ( "Click Play" );
+				System.out.println ( "1.2 - " + playTool.getPlayer ().getStatus () );
+				isPlaying = true;
+				mousePressed = true;
 			}
-			else { // isResume
-				isResume = true;
-				playResume ();
+			else if ( isPlaying ) { // isPlaying
+				pauseAudio ();
+				System.out.println ( "1.3 - " + playTool.getPlayer ().getStatus () );
+				System.out.println ( "Click Pause" );
+				isPlaying = false;
+				mousePressed = false;
 			}
-			System.out.println ( "Click Play" );
-			isPlaying = true;
-			mousePressed = true;
-		}
-		else { // isPlaying
-			pauseAudio ();
-			System.out.println ( "Click Pause" );
-			isPlaying = false;
-			mousePressed = false;
-		}
-		repaint ();
     }
-    else { // !( circlePlay.contains ( e.getPoint () ) )
-		if ( isPlaying ) {
-			mousePressed = false;
-			stopAudio ();
-			isPlaying = false;
-			System.out.println ( "Click Stop" );
-		}
-		else { // !isPlaying
-			isPlaying = true;
-			//openFile ( audioFile );
-			playAudio ();
-			System.out.println ( "Click Open" );
-		}
-		repaint ();
+    if ( !circlePlay.contains ( e.getPoint () ) && circleOpen.contains ( e.getPoint () ) ) {
+			if ( isPlaying ) {
+				mousePressed = false;
+				stopAudio ();
+				isPlaying = false;
+				System.out.println ( "1.4 - " + playTool.getPlayer ().getStatus () );
+				System.out.println ( "Click Stop" );
+			}
+			else if ( isPlaying ) { // !isPlaying
+				openFile ( audioFile );
+				isResume = false;
+				isPlaying = true;
+				System.out.println ( "1.5 - " + playTool.getPlayer ().getStatus () );
+				System.out.println ( "Click Open" );
+			}
 	  }
+		repaint ();
 	}
 
   void eventOutputVolume ( String eventDescription ) {
@@ -110,7 +117,8 @@ public class GUI extends JFrame implements MouseListener, MouseWheelListener {
 	// VOLUME
 	public void mouseWheelMoved ( MouseWheelEvent e ) {
 		String message = "";
-		if ( circleVolume.contains ( e.getPoint () ) ) {
+		//if ( circleVolume.contains ( e.getPoint () ) && !circleOpen.contains ( e.getPoint () ) ) {
+		if ( !circleOpen.contains ( e.getPoint () ) ) {
 			int notches = e.getWheelRotation ();
 			if ( notches < 0 && vol > 0 ) {
 				vol -= 5;
@@ -134,7 +142,6 @@ public class GUI extends JFrame implements MouseListener, MouseWheelListener {
 	private void pauseAudio () { playTool.pauseFile ();	}
 	private void playResume () { playTool.resumeFile (); }
 	private void stopAudio () { playTool.stopFile (); }
-	private void setPause () { playTool.pauseFile (); }
 	private void setPlayerVolume () {};
 	private void setVolume ( float volume ) { playTool.volumeAudio ( volume ); };
 

@@ -13,28 +13,22 @@ public class PlayTool implements BasicPlayerListener {
 	private BasicPlayer playMP3;
 	private BasicController control;
 	private float volume = 0.5f;
-	private Thread playThread;
 	private String audioFile = "";
-	private long totalLength = 0;
-	private long pause = 0;
 	private boolean statusResume = false;
 
 	// Constructor
 	public PlayTool () {}
 
-	Runnable runnablePlay = new Runnable () {
-	  @Override
-	  public void run () {
-	    try {
-				playMP3 = new BasicPlayer ();
-	      control = ( BasicController ) playMP3;
-	      //playMP3.addBasicPlayerListener ( this ); // for info file
-				control.open ( new File ( audioFile ) );
-	      control.play ();
-	    }
-	    catch ( Exception e ) { System.out.println ( "1. " + e ); }
-	  }
-	};
+	public void playFile () {
+		try {
+			playMP3 = new BasicPlayer ();
+			control = ( BasicController ) playMP3;
+			playMP3.addBasicPlayerListener ( this ); // for info file
+			control.open ( new File ( audioFile ) );
+			control.play ();
+		}
+		catch ( Exception e ) { System.out.println ( "1. " + e ); }
+	}
 
 	public void opened ( Object stream, Map properties ) {
     // Pay attention to properties. It's useful to get duration,
@@ -62,14 +56,9 @@ public class PlayTool implements BasicPlayerListener {
   }
 
 	public BasicPlayer getPlayer () { return playMP3; }
-	public Thread getPlayThread () { return playThread; }
 
 	public void openFile ( String audioFile ) {
 		this.audioFile = audioFile;
-	}
-
-	public void playFile () {
-			new Thread ( runnablePlay ).start ();
 	}
 
 	public void resumeFile () {
