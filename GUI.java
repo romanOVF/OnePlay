@@ -1,8 +1,5 @@
-// Created nov 13 tue 2018
-// reset && javac -d bin GUI.java PlayTool.java && java -cp bin mypack.GUI
-// reset && javac -d bin -cp jlayer-1.0.1.jar *.java && java -cp jlayer-1.0.1.jar:bin mypack.GUI
-// reset && javac -d bin -cp basicplayer3.0.jar:jlayer-1.0.1.jar *.java && java -cp basicplayer3.0.jar:jlayer-1.0.1.jar:bin mypack.GUI
-
+// Created nov 15 wed 2018
+// reset && javac -d bin -cp lib/tritonus_share.jar:lib/commons-logging-1.2.jar:lib/mp3spi1.9.4.jar:lib/jl1.0.jar:lib/basicplayer3.0.jar:lib/jlayer-1.0.1.jar *.java && java -cp lib/tritonus_share.jar:lib/commons-logging-1.2.jar:lib/mp3spi1.9.4.jar:lib/jl1.0.jar:lib/basicplayer3.0.jar:lib/jlayer-1.0.1.jar:bin mypack.GUI
 
 package mypack;
 
@@ -16,10 +13,10 @@ public class GUI extends JFrame implements MouseListener, MouseWheelListener {
 	private int x = 25;   // leftmost pixel in circle has this x-coordinate
 	private int y = 40;   // topmost  pixel in circle has this y-coordinate
 	private Ellipse2D circlePlay = new Ellipse2D.Double ( x + 25, y + 25, 100, 100 );
-	private Ellipse2D circleVolume = new Ellipse2D.Double ( x-7, y-7, 165, 165 );
+	private Ellipse2D circleVolume = new Ellipse2D.Double ( x - 7, y - 7, 165, 165 );
 	private PlayTool playTool = new PlayTool ();
-	private int vol = 250;
-	private float volume = 0.0f;
+	private int vol = 135;
+	private float volume = 0.5f;
 	private static boolean status = false;
 	private boolean mousePressed = false;
 	private boolean isPlaying = false;
@@ -44,11 +41,11 @@ public class GUI extends JFrame implements MouseListener, MouseWheelListener {
   // refreshed and  when repaint() is invoked
   public void paint ( Graphics g ) {
 		g.setColor ( Color.RED );
-		g.fillOval ( x-7, y-7, 165, 165 );
+		g.fillOval ( x - 7, y - 7, 165, 165 );
 		g.setColor ( Color.DARK_GRAY );
-    g.fillArc ( x-7, y-7, 165, 165, -45, -90 );
+    g.fillArc ( x - 7, y - 7, 165, 165, -45, -90 );
     g.setColor ( Color.YELLOW );
-    g.fillArc ( x-7, y-7, 165, 165, -45, vol );
+    g.fillArc ( x - 7, y - 7, 165, 165, -45, vol );
 
     if ( mousePressed ) { g.setColor ( Color.LIGHT_GRAY ); }
     else { g.setColor ( Color.GRAY ); }
@@ -70,12 +67,12 @@ public class GUI extends JFrame implements MouseListener, MouseWheelListener {
     if ( circlePlay.contains ( e.getPoint () ) ) {
 		if ( !isPlaying ) {
 			if ( !isResume ) {
-				isResume = !isResume;
+				isResume = true;
 				openFile ( audioFile );
 				playAudio ();
 			}
 			else { // isResume
-				isResume = !isResume;
+				isResume = true;
 				playResume ();
 			}
 			System.out.println ( "Click Play" );
@@ -83,8 +80,7 @@ public class GUI extends JFrame implements MouseListener, MouseWheelListener {
 			mousePressed = true;
 		}
 		else { // isPlaying
-			setPause ();
-			stopAudio ();
+			pauseAudio ();
 			System.out.println ( "Click Pause" );
 			isPlaying = false;
 			mousePressed = false;
@@ -118,13 +114,13 @@ public class GUI extends JFrame implements MouseListener, MouseWheelListener {
 			int notches = e.getWheelRotation ();
 			if ( notches < 0 && vol > 0 ) {
 				vol -= 5;
-				volume = -vol / 10.0f;
+				volume += 0.018f;
 				setVolume ( volume );
 				System.out.println ( volume );
 				message = vol + " volume +\n";
 			} else if ( vol < 270 ) {
 				vol += 5;
-				volume = -vol / 10.0f;
+				volume -= 0.018f;
 				setVolume ( volume );
 				System.out.println ( volume );
 				message = vol + " volume -\n";
@@ -135,12 +131,12 @@ public class GUI extends JFrame implements MouseListener, MouseWheelListener {
 	}
 	private void openFile ( String file ) { playTool.openFile ( audioFile ); }
 	private void playAudio () { playTool.playFile ();	}
-	private void pauseAudio () { playTool.setPause ();	}
-	private void playResume () { playTool.playResumeFile (); }
+	private void pauseAudio () { playTool.pauseFile ();	}
+	private void playResume () { playTool.resumeFile (); }
 	private void stopAudio () { playTool.stopFile (); }
-	private void setPause () { playTool.setPause (); }
+	private void setPause () { playTool.pauseFile (); }
 	private void setPlayerVolume () {};
-	private void setVolume ( float volume ) { playTool.volume ( volume ); };
+	private void setVolume ( float volume ) { playTool.volumeAudio ( volume ); };
 
 	public static void main ( String [] args ) {
 		new GUI ();

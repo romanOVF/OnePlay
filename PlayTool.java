@@ -1,105 +1,101 @@
-// Created nov 13 tue 2018
+// Created nov 15 wed 2018
 
 package mypack;
 
 import java.io.*;
-import javax.sound.sampled.*;
-import javax.sound.sampled.Line.Info;
-import javax.swing.*;
-
-import javazoom.jl.decoder.JavaLayerException;
-import javazoom.jl.player.advanced.*;
-import javazoom.jl.player.advanced.PlaybackListener;
+import java.util.Map;
 import javazoom.jl.decoder.*;
+import javazoom.jl.player.*;
+import javazoom.jl.player.advanced.*;
 import javazoom.jlgui.basicplayer.*;
-import javazoom.jl.player.JavaSoundAudioDevice;
 
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.FloatControl;
-import javax.sound.sampled.Line.Info;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.Port;
-
-
-public class PlayTool {
-	private FileInputStream fileInStream;
-	private AdvancedPlayer playMP3;
-	private float volume = 0.0f;
+public class PlayTool implements BasicPlayerListener {
+	private BasicPlayer playMP3;
+	private BasicController control;
+	private float volume = 0.5f;
 	private Thread playThread;
-	String audioFile = "";
-	long totalLength = 0;
-	long pause = 0;
-	boolean statusResume = false;
-	BufferedInputStream bufferedInStream;
-	Info source;
+	private String audioFile = "";
+	private long totalLength = 0;
+	private long pause = 0;
+	private boolean statusResume = false;
 
 	// Constructor
-	public PlayTool () {
-		//source = Port.Info.SPEAKER;
-    //source = Port.Info.LINE_OUT;
-    source = Port.Info.HEADPHONE;
-	}
-
-	public void volume ( float volume ) {
-		System.out.println ( "Hallo " + volume );
-		if ( AudioSystem.isLineSupported ( source ) ) {
-			try {
-				if ( source != null )	{
-					Port outline = ( Port ) AudioSystem.getLine ( source );
-					outline.open ();
-					FloatControl volControl = ( FloatControl ) outline.getControl ( FloatControl.Type.VOLUME );
-					float newGain = Math.min ( Math.max ( volume, volControl.getMinimum () ), volControl.getMaximum () );
-					volControl.setValue ( newGain );
-				}
-			}
-			catch ( Exception e ) { System.out.println ( "h-m?" ); }
-		}
-		else System.out.println ( "source not supported, sorry!" );
-	}
+	public PlayTool () {}
 
 	Runnable runnablePlay = new Runnable () {
 	  @Override
 	  public void run () {
 	    try {
-	      fileInStream = new FileInputStream ( audioFile );
-				bufferedInStream = new BufferedInputStream ( fileInStream );
-	      playMP3 = new AdvancedPlayer ( bufferedInStream );
-	      if ( !statusResume ) {	totalLength = fileInStream.available (); }
-				else { fileInStream.skip ( totalLength - pause );	}
-				//playMP3.setGain ( -30.0 );
-				//volControl.setValue ( -30.0 );
-	      playMP3.play ();
+				playMP3 = new BasicPlayer ();
+	      control = ( BasicController ) playMP3;
+	      //playMP3.addBasicPlayerListener ( this ); // for info file
+				control.open ( new File ( audioFile ) );
+	      control.play ();
 	    }
-	    catch ( Exception e ) {}
+	    catch ( Exception e ) { System.out.println ( "1. " + e ); }
 	  }
 	};
+
+	public void opened ( Object stream, Map properties ) {
+    // Pay attention to properties. It's useful to get duration,
+    // bitrate, channels, even tag such as ID3v2.
+    display ( "opened : " + properties.toString () );
+  }
+
+  public void progress ( int bytesread, long microseconds, byte [] pcmdata, Map properties ) {
+    // Pay attention to properties. It depends on underlying JavaSound SPI
+    // MP3SPI provides mp3.equalizer.
+    display ( "progress : " + properties.toString () );
+  }
+
+  public void stateUpdated ( BasicPlayerEvent event ) {
+    // Notification of BasicPlayer states (opened, playing, end of media, ...)
+    display ( "stateUpdated : " + event.toString () );
+  }
+
+  public void setController ( BasicController controller ) {
+    display ( "setController : " + controller );
+  }
+
+  public void display ( String msg ) {
+    if ( System.out != null ) System.out.println ( msg );
+  }
+
+	public BasicPlayer getPlayer () { return playMP3; }
+	public Thread getPlayThread () { return playThread; }
 
 	public void openFile ( String audioFile ) {
 		this.audioFile = audioFile;
 	}
-	public AdvancedPlayer getPlayer () { return playMP3; }
-	public FileInputStream getFileInStream () { return fileInStream; }
-	public Thread getPlayThread () { return playThread; }
 
 	public void playFile () {
-		if ( pause != 0 ) {
 			new Thread ( runnablePlay ).start ();
-		}
-		else {
-			try { fileInStream.skip ( totalLength ); }
-			catch ( Exception e ) {}
-			new Thread ( runnablePlay ).start ();
-		}
-	}
-	public void playResumeFile () {
-		statusResume = true;
-		new Thread ( runnablePlay ).start ();
 	}
 
-	public void setPause () {
-		try { pause = fileInStream.available (); }
-		catch ( Exception e ) {}
-		System.out.println ( "pause frame: " + pause );
+	public void resumeFile () {
+		try { control.resume (); }
+		catch ( Exception e ) { System.out.println ( "resume.e " +e ); }
 	}
-	public void stopFile () { playMP3.close (); }
+
+	public void pauseFile () {
+		try { control.pause (); }
+		catch ( Exception e ) { System.out.println ( "pause.e " +e ); }
+	}
+
+	public void stopFile () {
+		try { control.stop (); }
+		catch ( Exception e ) { System.out.println ( "stop.e " + e ); }
+	}
+
+	public void volumeAudio ( float volume ) {
+		System.out.println ( "Hallo " + volume );
+		this.volume = volume;
+		try { control.setGain ( volume ); } // Set Volume (0 to 1.0).
+		catch ( Exception e ) { System.out.println ( "volume.e " +e ); }
+	}
+
+	public void setAudioBalance () {
+		try { control.setPan ( 0.0 ); } // Set Pan (-1.0 to 1.0).
+		catch ( Exception e ) { System.out.println ( "pan.e " + e ); }
+	}
 }
