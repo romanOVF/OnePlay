@@ -1,4 +1,4 @@
-// Created nov 15 wed 2018
+// Created nov 16 fri 2018
 
 package mypack;
 
@@ -54,8 +54,6 @@ public class PlayTool implements BasicPlayerListener {
   public void display ( String msg ) {
     if ( System.out != null ) System.out.println ( msg );
   }
-
-	public BasicPlayer getPlayer () { return playMP3; }
 
 	public void openFile ( String audioFile ) {
 		this.audioFile = audioFile;
