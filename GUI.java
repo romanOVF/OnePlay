@@ -18,7 +18,6 @@ public class GUI extends JFrame implements MouseListener, MouseWheelListener {
 	private PlayTool playTool = new PlayTool ();
 	private int vol = 135;
 	private float volume = 0.5f;
-	private static boolean status = false;
 	private boolean mousePressed = false;
 	private boolean isPlaying = false;
 	private boolean isPause = false;
@@ -52,10 +51,19 @@ public class GUI extends JFrame implements MouseListener, MouseWheelListener {
     else { g.setColor ( Color.GRAY ); }
 
     g.fillOval ( x, y, 150, 150 );
-    g.setColor ( Color.BLACK );
-    Graphics2D g2 = ( Graphics2D ) g;
+    /*g.setColor ( Color.BLACK );
+    Graphics2D g2 = ( Graphics2D ) g; // to display boundary contours
     g2.draw ( circlePlay );
-    g2.draw ( circleOpen );
+    g2.draw ( circleOpen ); // */
+
+		if ( mousePressed ) {
+			g.setColor ( Color.GRAY );
+			g.fillOval ( 50, 65, 100, 100 );
+		}
+		else {
+			g.setColor ( Color.LIGHT_GRAY );
+			g.fillOval ( 50, 65, 100, 100 );
+		}
   }
 
   // The next 4 methods must be defined, but you won't use them.
